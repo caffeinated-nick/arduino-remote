@@ -2,7 +2,7 @@
 This code will provide a simple webpage with buttons that will allow the user to control RF devices remotely. The webpage can of course be accessed from any device with a browser. 
 
 ## Architecture
-This code has originally been written for use on an Arduino Uno, with an attached ESP-13 Wifi Shield (Jaycar XC4614, which uses an ESP8266 chip), and a generic 433MHz RF transmitter, in this case Jaycar ZW3100. The code itself is deployed to the ESP-13 Shield, because the Wifi module ([ESP8266Wifi](https://github.com/esp8266/Arduino)) that this was based on used the chip directly. The Uno itself is flashed with a blank program. [WifiESP](https://github.com/bportaluri/WiFiEsp) can be used on the Uno to interface with the Shield. The RF transmitter is therefore connected to the Shield, and is interfaced with using [RCSwitch](https://github.com/sui77/rc-switch). 
+This code has originally been written for use on an Arduino Uno, with an attached ESP-13 Wifi Shield (Jaycar XC4614, which uses an ESP8266 chip), and a generic 433MHz RF transmitter, in this case Jaycar ZW3100. The code itself is deployed to the ESP-13 Shield, because the Wifi module ([ESP8266Wifi](https://github.com/esp8266/Arduino)) that this was based on used the chip directly. The Uno itself is flashed with a blank program. [WifiESP](https://github.com/bportaluri/WiFiEsp) can be used on the Uno to interface with the Shield. The RF transmitter is therefore connected to the Shield, and is interfaced with by [RCSwitch](https://github.com/sui77/rc-switch). 
 
 The shield maintains an internal "state" which consists of two variables:
   * The state of the TV fan switch.
@@ -10,7 +10,7 @@ The shield maintains an internal "state" which consists of two variables:
 
 The state is the signal that has *most recently* been sent to the fan receiver, i.e. the intended current state of the fan itself. It is simply a combination of LIGHT on/off, and FAN 0/1/2/3. The possible states for each fan, and the associated RF transmission for each can be viewed below, or in more detail in Fan RF Signals.csv. 
 
-The number in each cell is a decimal number representation of the RF signal to be transmit.
+The number in each cell is a decimal number representation of the RF signal to be transmitted.
 
 | **Lounge**    | **Light Off** | **Light On** |
 |---------------|---------------|--------------|
