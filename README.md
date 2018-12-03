@@ -7,6 +7,7 @@ This code has originally been written for use on an Arduino Uno, with an attache
 The shield maintains an internal "state" which consists of two variables:
   * The state of the TV fan switch.
   * The state of the Lounge fan switch.
+
 The state is the signal that has *most recently* been sent to the fan receiver, i.e. the intended current state of the fan itself. It is simply a combination of LIGHT on/off, and FAN 0/1/2/3. The possible states for each fan, and the associated RF transmission for each can be viewed below, or in more detail in Fan RF Signals.csv. 
 
 The number in each cell is a decimal number representation of the RF signal to be transmit.
