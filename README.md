@@ -2,7 +2,7 @@
 This code will provide a simple webpage with buttons that will allow the user to control RF devices remotely. The webpage can of course be accessed from any device with a browser. 
 
 ## Architecture
-This code has originally been written for use on an Arduino Uno, with an attached ESP-13 Wifi Shield (Jaycar XC4614, which using an ESP8266 chip), and a generic 433MHz RF transmitter, in this case Jaycar ZW3100. The code itself is deployed to the ESP-13 Shield, because the Wifi module ([ESP8266Wifi](https://github.com/esp8266/Arduino)) that this was based on used the chip directly. The Uno itself is flashed with a blank program. [WifiESP](https://github.com/bportaluri/WiFiEsp) can be used on the Uno to interface with the Shield. The RF transmitter is therefore connected to the Shield, and is interfaced with using [RCSwitch](https://github.com/sui77/rc-switch). 
+This code has originally been written for use on an Arduino Uno, with an attached ESP-13 Wifi Shield (Jaycar XC4614, which uses an ESP8266 chip), and a generic 433MHz RF transmitter, in this case Jaycar ZW3100. The code itself is deployed to the ESP-13 Shield, because the Wifi module ([ESP8266Wifi](https://github.com/esp8266/Arduino)) that this was based on used the chip directly. The Uno itself is flashed with a blank program. [WifiESP](https://github.com/bportaluri/WiFiEsp) can be used on the Uno to interface with the Shield. The RF transmitter is therefore connected to the Shield, and is interfaced with using [RCSwitch](https://github.com/sui77/rc-switch). 
 
 The shield maintains an internal "state" which consists of two variables:
   * The state of the TV fan switch.
@@ -29,9 +29,9 @@ The control flow for someone accessing the remote is therefore:
 1. The client makes a plain GET request to the address assigned to the shield.
 2. The shield acts as a server: it parses the request.
 3. The server updates its state as required.
-3. The server sends one or more of the signals in the above tables to the RF transmitter, which is then transmitted to the fan/s. 
-4. The server generates the HTML as a single String.
-4. The generated HTML is returned to the client.
+4. The server sends one or more of the signals in the above tables to the RF transmitter, which is then transmitted to the fan/s. 
+5. The server generates the HTML as a single String.
+6. The generated HTML is returned to the client.
 
 ## Installation
 ### First Time Setup
