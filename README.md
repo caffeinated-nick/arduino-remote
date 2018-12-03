@@ -39,7 +39,7 @@ For first-time setup, have a look at the [here](docs/first_time_setup.md).
 
 ### Flashing to the Arduino
 With the code open in the Arduino IDE, plug the Uno into the computer and wire the ESP-13 shield to the Uno like so:
-![Uno to ESP wiring][https://gitlab.com/ProgrammerNick/arduino-fan-remote/blob/master/docs/Arduino_to_ESP13_Shield_connections_bb.png]
+![Uno to ESP wiring][docs/Arduino_to_ESP13_Shield_connections_bb.png]
 
 Ensure that the ESP13 shield is selected in the IDE, and that the port is correctly configured.
 
