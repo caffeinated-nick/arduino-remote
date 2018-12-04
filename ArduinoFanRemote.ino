@@ -26,8 +26,8 @@
  ============================================================================ */
 #include <ESP8266WiFi.h>
 #include <RCSwitch.h>
-const char* ssid = "Router? I Hardly Know Her!";
-const char* password = "cocopops2018";
+const char* ssid = "ssid";
+const char* password = "password";
 WiFiServer server(80);
 
 /** TV Light States, Lounge Light States (see "Fan RF Signals.csv" for more info)
