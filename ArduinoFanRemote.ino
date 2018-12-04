@@ -30,7 +30,7 @@ const char* ssid = "Router? I Hardly Know Her!";
 const char* password = "cocopops2018";
 WiFiServer server(80);
 
-/** TV Light States, Lounge Light States
+/** TV Light States, Lounge Light States (see "Fan RF Signals.csv" for more info)
  * TV:
  *  Light off, fan 0-3: 229389, 229472, 229455, 229422 
  *  Light on, fan 0-3: 229505, 229604, 229571, 229538 
@@ -65,9 +65,6 @@ void setup() {
   
   // Optional set protocol (default is 1, will work for most outlets)
   mySwitch.setProtocol(6);
-
-  // Optional set pulse length.
-  // mySwitch.setPulseLength(320);
   
   // Optional set number of transmission repetitions.
   mySwitch.setRepeatTransmit(15);
@@ -112,19 +109,30 @@ void loop() {
           String clientMessage = client.readStringUntil('\r');
           Serial.println("Client message:");
           Serial.println(clientMessage);
-          
-          if (clientMessage.startsWith("GET /TVL")) {
+
+          if(clientMessage.startsWith("GET /LIGHTS")) {
+            Serial.println("Toggling both lights...");
+            tvSwitchState = updateLightState(0, tvSwitchState);
+            loungeSwitchState = updateLightState(1, loungeSwitchState);
+          } else if (clientMessage.startsWith("GET /FANS")) {
+            Serial.println("Setting both fans...");
+            tvSwitchState = updateFanState(0, tvSwitchState);
+            loungeSwitchState = updateFanState(1, loungeSwitchState);
+          } else if (clientMessage.startsWith("GET /KILL")) {
+            Serial.println("Shutting both switches completely off...");
+            killSwitches();
+          } else if (clientMessage.startsWith("GET /TVL")) {
             Serial.println("Toggling TV light...");
-            updateTVLightState();
+            tvSwitchState = updateLightState(0, tvSwitchState);
           } else if (clientMessage.startsWith("GET /TVF")) {
             Serial.println("Setting TV fan...");
-            updateTVFanState();
+            tvSwitchState = updateFanState(0, tvSwitchState);
           } else if (clientMessage.startsWith("GET /LOUNGEL")) {
             Serial.println("Toggling Lounge light...");
-            updateLoungeLightState();
+            loungeSwitchState = updateLightState(1, loungeSwitchState);
           } else if (clientMessage.startsWith("GET /LOUNGEF")) {
             Serial.println("Toggling Lounge fan...");
-            updateLoungeFanState();
+            loungeSwitchState = updateFanState(1, loungeSwitchState);
           } 
           
           if(clientMessage.length() == 1 && clientMessage[0] =='\n') {
@@ -184,6 +192,11 @@ String constructHTMLpage(){
           ".twoSpeed {" +
             "background-color: yellow" +
           "}" +
+
+          ".blank {" +
+            "background-color: white;" +
+            "border-style: solid;" +
+          "}" +
         "</style>";
   HTMLpage = HTMLpage + String("</head>");
   
@@ -191,17 +204,42 @@ String constructHTMLpage(){
   
   HTMLpage = HTMLpage + String("<br/><br/>");
 
+  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LIGHTS\'\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>");
   HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/TVL\'\" class=\"" + getLightButtonClassByState(0) + "\">TV Light</button>");
+  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LOUNGEL\'\" class=\"" + getLightButtonClassByState(1) + "\">Lounge Light</button>");
+  HTMLpage = HTMLpage + String("<br/><br/>"); 
+  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/FANS\'\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>");
   HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/TVF\'\" class=\"" + getFanButtonClassByState(0) + "\">TV Fan</button>");
-  HTMLpage = HTMLpage + String("<br/><br/>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LOUNGEL\'\" class=\"" + getLightButtonClassByState(1) + "\">Lounge Light</button>"); 
   HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LOUNGEF\'\" class=\"" + getFanButtonClassByState(1) + "\">Lounge Fan</button>"); 
+  HTMLpage = HTMLpage + String("<br/><br/>");
+  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/KILL\'\" class=\"kill\">Kill Switch</button>");
 
   HTMLpage = HTMLpage + String("</body></html>");
   
   HTMLpage = HTMLpage + String("\r\n");
 
   return HTMLpage;
+}
+
+String getCombinedLightsBtnClassByState() {
+  if(loungeSwitchState > 3 && tvSwitchState > 3) {
+    return "active";
+    // For the sake of all that is holy write a damn helper function to determine if a given light is on or off
+  } else if(loungeSwitchState > 3 && tvSwitchState < 4 || loungeSwitchState < 4 && tvSwitchState > 3) {
+    return "blank"; 
+  }  
+  return "inactive";
+}
+
+String getCombinedFansBtnClassByState() {
+  // For the love of god write a help function for if the fans are the same
+  if(loungeSwitchState == tvSwitchState || loungeSwitchState == tvSwitchState - 4 || loungeSwitchState == tvSwitchState + 4) {
+    if(loungeSwitchState == 0 || loungeSwitchState == 4) {
+      return "inactive";
+    } 
+    return getFanButtonClassByState(0);
+  }
+  return "blank";
 }
 
 /**
@@ -258,79 +296,51 @@ String classFromFanState(int state){
 }
 
 /**
- *  Update the state for the TV light switch
- *  If the state is high (4-7) then the light is already on
+ * Update the ligth state for a switch, return the new state.
+ * If the state is high (4-7) then the light is on already, so turn it off.
  */
-void updateTVLightState(){
-  if(tvSwitchState < 4) {
-    tvSwitchState+= 4;
+int updateLightState(int switchIndex, int switchState) {
+  if(switchState < 4) {
+    switchState += 4;
   } else {
-    tvSwitchState -= 4;
+    switchState -= 4;
   }
   Serial.println("");
-  Serial.printf("Setting TV state to %d", tvSwitchState);
+  Serial.printf("Setting switch %d to %d...", switchIndex, switchState);
   Serial.println("");
-  updateState(0);
+  updateState(switchIndex, switchState);
+  return switchState;
 }
 
 /**
- *  Update the state for the Lounge light switch
- *  If the state is high (4-7) then the light is already on
+ * Update the fan state for a switch, return the new state.
+ * If the state is 3 or 7 then the fan is at max speed, so set back down to 0/off.
  */
-void updateLoungeLightState(){
-  if(loungeSwitchState < 4) {
-    loungeSwitchState += 4;
+int updateFanState(int switchIndex, int switchState) {
+  if(switchState == 3 || switchState == 7){
+    switchState -= 3;
   } else {
-    loungeSwitchState -= 4;
+    switchState++;
   }
   Serial.println("");
-  Serial.printf("Setting lounge state to %d", loungeSwitchState);
+  Serial.printf("Setting switch %d to %d", switchIndex, switchState);
   Serial.println("");
-  updateState(1);
-}
-
-/**
- *  Update the state for the TV fan,
- *  Increment the state (fan speed) unless at max, in which case reset to fan off
- */
-void updateTVFanState(){
-  if(tvSwitchState == 3 || tvSwitchState == 7){
-    tvSwitchState -= 3;
-  } else {
-    tvSwitchState++;
-  }
-  Serial.println("");
-  Serial.printf("Setting TV state to %d", tvSwitchState);
-  Serial.println("");
-  updateState(0);
-}
-
-/**
- *  Update the state for the Lounge fan,
- *  Increment the state (fan speed) unless at max, in which case reset to fan off
- */
-void updateLoungeFanState(){
-    if(loungeSwitchState == 3 || loungeSwitchState == 7){
-    loungeSwitchState -= 3;
-  } else {
-    loungeSwitchState++;
-  }
-  Serial.println("");
-  Serial.printf("Setting lounge state to %d", loungeSwitchState);
-  Serial.println("");
-  updateState(1);
+  updateState(switchIndex, switchState);
+  return switchIndex;
 }
 
 /**
  *  Update the state of the FAN itself (i.e. send the updated state to the fan)
- *  Only parameter is which fan we are sending the update to.
  */
-void updateState(bool isLoungeFan){
-  if(isLoungeFan) {
-    sendSignal(states[1][loungeSwitchState]);
-  } else {
-    sendSignal(states[0][tvSwitchState]);
-  }
+void updateState(int index, int switchState){
+  sendSignal(states[index][switchState]);
+}
+
+void killSwitches() {
+  loungeSwitchState = 0;
+  tvSwitchState = 0;
+  updateState(0, tvSwitchState);
+  updateState(1, loungeSwitchState);
 }
 
 /**
