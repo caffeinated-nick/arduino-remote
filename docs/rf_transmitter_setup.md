@@ -1,6 +1,6 @@
 # RF Transmitter Setup
 
-While running the Arduino setup should involve the ESP-13 shield connected directly to the Arduino Uno. The RF Transmitter should then be connected on the *ESP-13* side of the ESP board:
+While running, the Arduino setup should involve the ESP-13 shield connected directly to the Arduino Uno. The RF Transmitter should then be connected on the *ESP-13* side of the ESP board:
 
 | **ESP-13**    | **RF-Transmitter** |
 |---------------|--------------------|
