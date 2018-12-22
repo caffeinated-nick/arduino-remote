@@ -72,6 +72,7 @@ See [troubleshooting](docs/troubleshooting.md).
 
 ## TODO:
   * Tidy up some of the duplicate code (there is currently a PR open for this), including adding some helper methods for retrieving the current state of the light/fan.
+  * Safari currently automatically refreshes the page, sending duplicate requests. This is a minor inconvenience that should be fixed.
 
 ## Futher Reading/Help
 ESP13 shield first time setup: https://arduinobasics.blogspot.com/2018/09/getting-started-with-keyes-esp-13-wifi.html
