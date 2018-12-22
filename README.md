@@ -36,7 +36,7 @@ The control flow for someone accessing the remote is therefore:
 
 ## Installation
 ### First Time Setup
-For first-time setup, have a look at the [here](docs/first_time_setup.md).
+For first-time setup, have a look at the [first time setup](docs/first_time_setup.md).
 
 ### Flashing to the Arduino
 With the code open in the Arduino IDE, plug the Uno into the computer and wire the ESP-13 shield to the Uno like so:
@@ -44,7 +44,7 @@ With the code open in the Arduino IDE, plug the Uno into the computer and wire t
 
 Ensure that the ESP13 shield is selected in the IDE, and that the port is correctly configured.
 
-With this setup, the TX/RX (Tranmission/Reception) of the Uno are overriden by that of the ESP13 shield, and the ESP13 will recieve power. Connecting PIN 0 on the shield to G (ground) will also put the shield in receive mode, i.e. it will be prepared to receive data.
+With this setup, the ESP-13 will receive power, and the TX/RX (Tranmission/Reception) of the Uno are overriden by that of the shield. Connecting PIN 0 on the shield to G (ground) will also put the shield in receive mode, i.e. it will be prepared to receive data.
 
 In the Arduino IDE you should open the Serial Monitor: Tools/Serial Monitor or ctrl/cmd + shift + m. This monitor is where Serial.println statements can be found. With the Uno and shield wired up as shown above, you should be able to click "upload" (ctrl/cmd + u) to flash your program to the shield. (Note that uploading with nothing plugged in to the Uno's RX/TX ports will allow you to upload to the Uno itself, but **to upload to the ESP13 shield the Uno should be flashed with a blank sketch**).
 
@@ -64,8 +64,14 @@ I know the that the above process is kind of nuts, but in my experience it is su
 
 Once you've successfully uploaded a program, remove the wire connecting D0 to G, and power cycle the shield (remove and replace either the wire connecting to G or to 5V). Reopen the serial monitor and press RST on the shield to see expected output.
 
+## Contributing
+Take a branch and make whatever changes you'd like before making a PR/merge request. My only request is that you be collaborative in whatever changes are being made.
+
+## Troubleshooting Remote Failures
+See [troubleshooting](docs/troubleshooting.md).
+
 ## TODO:
-  * Tidy up some of the duplicate code, including adding some helper methods for retrieving the current state of the light/fan.
+  * Tidy up some of the duplicate code (there is currently a PR open for this), including adding some helper methods for retrieving the current state of the light/fan.
 
 ## Futher Reading/Help
 ESP13 shield first time setup: https://arduinobasics.blogspot.com/2018/09/getting-started-with-keyes-esp-13-wifi.html
