@@ -26,8 +26,8 @@
  ============================================================================ */
 #include <ESP8266WiFi.h>
 #include <RCSwitch.h>
-const char* ssid = "ssid";
-const char* password = "password";
+const char* ssid = "Router? I Hardly Know Her!";
+const char* password = "cocopops2018";
 WiFiServer server(80);
 
 /** TV Light States, Lounge Light States (see "Fan RF Signals.csv" for more info)
@@ -72,17 +72,34 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
-  boolean r = WiFi.begin(ssid, password);
+  
+//  Serial.printf("Preparing to connect... %d", connected);
+//  Serial.println();
 
-  if (r) {
+  WiFi.begin("Router? I Hardly Know Her!", "cocopops2018");
+
+  Serial.print("Connecting...");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.println(WiFi.status());
+  }
+  
+  Serial.println();
+  
+  if (WiFi.status() == WL_CONNECTED) {
     server.begin();
     Serial.println("");
-    Serial.print("Conencted to Access Point: ");
-    Serial.println(ssid);
-    Serial.println("Should be accessible at 10.0.0.245. If not available double check the config on the router.");
+    Serial.println(WiFi.localIP());
+    Serial.println("Should be accessible at:");
+    Serial.println(WiFi.localIP());
     Serial.println("");
   } else {
     Serial.println("FAILED to connect to Access Point");
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; i++) {
+      Serial.println(WiFi.SSID(i));
+    }
     while(1){}
   }
 }
@@ -105,11 +122,11 @@ void loop() {
     Serial.println("\n A Client just connected to the server");
     if(!chromeHoldingRequest) {
       while(client.connected()) {
-        if(client.available()){
+        if(client.available()){  
           String clientMessage = client.readStringUntil('\r');
           Serial.println("Client message:");
           Serial.println(clientMessage);
-
+          
           if(clientMessage.startsWith("GET /LIGHTS")) {
             Serial.println("Toggling both lights...");
             tvSwitchState = updateLightState(0, tvSwitchState);
@@ -133,18 +150,20 @@ void loop() {
           } else if (clientMessage.startsWith("GET /LOUNGEF")) {
             Serial.println("Toggling Lounge fan...");
             loungeSwitchState = updateFanState(1, loungeSwitchState);
-          } 
+          } else if (clientMessage.startsWith("GET /FKILL")) {
+            killFans();
+          }
           
-          if(clientMessage.length() == 1 && clientMessage[0] =='\n') {
+          if (clientMessage.length() == 1 && clientMessage[0] =='\n') {
             client.println(constructHTMLpage());
             break;
           }
 
-          if(strstr(clientMessage.c_str(), "Chrome")){
-            Serial.println("Request came from Chrome, expect to close next connection manually.");
+          if (strstr(clientMessage.c_str(), "Chrome")) {
+            //Request came from Chrome, expect to close next connection manually.
             chromeHoldingRequest = 1;
-          }
-        } 
+          } 
+        }
       }
     } else {
       Serial.println("Looks like Chrome maintaining a connection. Disconnecting...");
@@ -153,6 +172,8 @@ void loop() {
     delay(1000);
     client.stop();
     Serial.println("\n The server has disconnected the Client");
+    Serial.printf("TV switch is now %d, Lounge switch is now %d", tvSwitchState, loungeSwitchState);
+    Serial.println();
   }
 }
 
@@ -165,58 +186,82 @@ String constructHTMLpage(){
   String HTMLpage = String("HTTP/1.1 200 OK\r\n") +
                             "Content-Type: text/html\r\n" +
                             "Connection: close\r\n" +
-                            "Refresh: 5\r\n" +
                             "\r\n" +
                             "<!DOCTYPE HTML>";
                             
-  HTMLpage = HTMLpage + String("<html>");
-  HTMLpage = HTMLpage + String("<head>") +
-        "<style>" +
-          "button {" +
-            "padding: 50px;" +
-            "font-size: 30px;" + 
-          "}" +
+  HTMLpage = HTMLpage + String("<html>") +
+          "<head>" +
+          "<style>" +
+            "html {" +
+              "height: 100%;" +
+            "}" +
+            
+            "body {" +
+              "height: 90%;" +
+              "display: flex;" +
+              "flex-direction: column;" +
+            "}" +
+
+            "div {" +
+              "width: 90%;" +
+              "margin-left: auto;" +
+              "margin-right: auto;" +
+              "display: flex;" +
+              "justify-content: space-evenly;" +
+              "flex-grow: 1;"
+            "}" +
+            
+            "button {" +
+              "padding: 50px;" +
+              "font-size: 30px;" + 
+              "margin: 5px;" +
+              "flex-grow: 1;" +
+            "}" +
+          
+            ".inactive {" +
+              "background-color: #B0BEC5;" +
+            "}" +
         
-          ".inactive {" +
-            "background-color: red;" +
-          "}" +
-      
-          ".active {" +
-            "background-color: green" +
-          "}" +
-
-          ".oneSpeed {" +
-            "background-color: orange" +
-          "}" +
-
-          ".twoSpeed {" +
-            "background-color: yellow" +
-          "}" +
-
-          ".blank {" +
-            "background-color: white;" +
-            "border-style: solid;" +
-          "}" +
-        "</style>";
-  HTMLpage = HTMLpage + String("</head>");
+            ".active {" +
+              "background-color: #FDD835" +
+            "}" +
   
-  HTMLpage = HTMLpage + String("<body>");
+            ".oneSpeed {" +
+              "background-color: #FDD835" +
+            "}" +
   
-  HTMLpage = HTMLpage + String("<br/><br/>");
-
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LIGHTS\'\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/TVL\'\" class=\"" + getLightButtonClassByState(0) + "\">TV Light</button>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LOUNGEL\'\" class=\"" + getLightButtonClassByState(1) + "\">Lounge Light</button>");
-  HTMLpage = HTMLpage + String("<br/><br/>"); 
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/FANS\'\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/TVF\'\" class=\"" + getFanButtonClassByState(0) + "\">TV Fan</button>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/LOUNGEF\'\" class=\"" + getFanButtonClassByState(1) + "\">Lounge Fan</button>"); 
-  HTMLpage = HTMLpage + String("<br/><br/>");
-  HTMLpage = HTMLpage + String("<button onclick=\"window.location.href=\'/KILL\'\" class=\"kill\">Kill Switch</button>");
-
-  HTMLpage = HTMLpage + String("</body></html>");
+            ".twoSpeed {" +
+              "background-color: #FB8C00" +
+            "}" +
   
-  HTMLpage = HTMLpage + String("\r\n");
+            ".threeSpeed {" +
+              "background-color: #E53935" +
+            "}" +
+  
+            ".kill {" +
+              "background-color: #263238;" +
+              "color: white;" +
+              "border-style: solid;" +
+            "}" +
+          "</style>" +
+        "</head>" +
+
+        "<body>" +
+          "<br/><br/><div>" +
+          "<button onclick=\"window.location.href=\'/LIGHTS\'\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>" +
+          "<button onclick=\"window.location.href=\'/TVL\'\" class=\"" + getLightButtonClassByState(0) + "\">TV Light</button>" +
+          "<button onclick=\"window.location.href=\'/LOUNGEL\'\" class=\"" + getLightButtonClassByState(1) + "\">Lounge Light</button>" +
+          "</div><br/><br/><div>" +
+          "<button onclick=\"window.location.href=\'/FANS\'\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>" +
+          "<button onclick=\"window.location.href=\'/TVF\'\" class=\"" + getFanButtonClassByState(0) + "\">TV Fan</button>" +
+          "<button onclick=\"window.location.href=\'/LOUNGEF\'\" class=\"" + getFanButtonClassByState(1) + "\">Lounge Fan</button>" +
+//          "<button onclick=\"window.location.href=\'/FKILL\'\" class=\"kill\">Kill Fans</button>" +
+          "</div><br/><br/><div>" +
+          "<button onclick=\"window.location.href=\'/KILL\'\" class=\"kill\">OFF</button>" +
+          "</div>" +
+        "</body>" +
+        "</html>" +
+        "\r\n";
 
   return HTMLpage;
 }
@@ -289,7 +334,7 @@ String classFromFanState(int state){
       break;
     case(3):
     case(7):
-      return "active";
+      return "threeSpeed";
       break;
   }
   return "inactive";
@@ -326,7 +371,7 @@ int updateFanState(int switchIndex, int switchState) {
   Serial.printf("Setting switch %d to %d", switchIndex, switchState);
   Serial.println("");
   updateState(switchIndex, switchState);
-  return switchIndex;
+  return switchState;
 }
 
 /**
@@ -334,6 +379,11 @@ int updateFanState(int switchIndex, int switchState) {
  */
 void updateState(int index, int switchState){
   sendSignal(states[index][switchState]);
+}
+
+void killFans() {
+  // noop (YET)
+  // write the "is light on?" helper function first and refactor for that
 }
 
 void killSwitches() {
