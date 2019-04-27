@@ -198,6 +198,8 @@ String constructHTMLpage(){
             
             "body {" +
               "height: 90%;" +
+              "margin-top: auto;" +
+              "margin-bottom: auto;" +
               "display: flex;" +
               "flex-direction: column;" +
             "}" +
@@ -271,7 +273,7 @@ String getCombinedLightsBtnClassByState() {
     return "active";
     // For the sake of all that is holy write a damn helper function to determine if a given light is on or off
   } else if(loungeSwitchState > 3 && tvSwitchState < 4 || loungeSwitchState < 4 && tvSwitchState > 3) {
-    return "blank"; 
+    return "inactive"; 
   }  
   return "inactive";
 }
@@ -284,7 +286,7 @@ String getCombinedFansBtnClassByState() {
     } 
     return getFanButtonClassByState(0);
   }
-  return "blank";
+  return "inactive";
 }
 
 /**
