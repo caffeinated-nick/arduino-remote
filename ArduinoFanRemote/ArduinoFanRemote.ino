@@ -40,6 +40,8 @@ WiFiServer server(80);
  *
  */
 int states[2][8] = {{229389, 229472, 229455, 229422, 229505, 229604, 229571, 229538}, {245775, 245858, 245825, 245792, 245891, 245990, 245957, 245924}};
+int tvIndex = 0;
+int loungeIndex = 1;
 
 // Do we expect the next request to be a superfluous Chrome connection?
 bool chromeHoldingRequest = 0;
@@ -119,57 +121,54 @@ void setup() {
 void loop() {
   WiFiClient client = server.available();
   if(client){
-    Serial.println("\n A Client just connected to the server");
-    if(!chromeHoldingRequest) {
+      Serial.println("\n A Client just connected to the server");
       while(client.connected()) {
         if(client.available()){  
           String clientMessage = client.readStringUntil('\r');
-          Serial.println("Client message:");
-          Serial.println(clientMessage);
-          
-          if(clientMessage.startsWith("GET /LIGHTS")) {
-            Serial.println("Toggling both lights...");
+            Serial.println("Client message:");
+            Serial.println(clientMessage);
+
+          if(clientMessage.startsWith("GET /li")) {
+              Serial.println("Toggling both lights...");
             tvSwitchState = updateLightState(0, tvSwitchState);
             loungeSwitchState = updateLightState(1, loungeSwitchState);
-          } else if (clientMessage.startsWith("GET /FANS")) {
-            Serial.println("Setting both fans...");
+          } else if (clientMessage.startsWith("GET /fa")) {
+              Serial.println("Setting both fans...");
             tvSwitchState = updateFanState(0, tvSwitchState);
             loungeSwitchState = updateFanState(1, loungeSwitchState);
-          } else if (clientMessage.startsWith("GET /KILL")) {
+          } else if (clientMessage.startsWith("GET /off")) {
             Serial.println("Shutting both switches completely off...");
             killSwitches();
-          } else if (clientMessage.startsWith("GET /TVL")) {
+          } else if (clientMessage.startsWith("GET /tLi")) {
             Serial.println("Toggling TV light...");
             tvSwitchState = updateLightState(0, tvSwitchState);
-          } else if (clientMessage.startsWith("GET /TVF")) {
+          } else if (clientMessage.startsWith("GET /tFa")) {
             Serial.println("Setting TV fan...");
             tvSwitchState = updateFanState(0, tvSwitchState);
-          } else if (clientMessage.startsWith("GET /LOUNGEL")) {
+          } else if (clientMessage.startsWith("GET /lLi")) {
             Serial.println("Toggling Lounge light...");
             loungeSwitchState = updateLightState(1, loungeSwitchState);
-          } else if (clientMessage.startsWith("GET /LOUNGEF")) {
+          } else if (clientMessage.startsWith("GET /lFa")) {
             Serial.println("Toggling Lounge fan...");
             loungeSwitchState = updateFanState(1, loungeSwitchState);
-          } else if (clientMessage.startsWith("GET /FKILL")) {
-            killFans();
-          }
-          
-          if (clientMessage.length() == 1 && clientMessage[0] =='\n') {
-            client.println(constructHTMLpage());
-            break;
           }
 
-          if (strstr(clientMessage.c_str(), "Chrome")) {
-            //Request came from Chrome, expect to close next connection manually.
-            chromeHoldingRequest = 1;
-          } 
+          if (clientMessage.startsWith("GET / ")) {
+            Serial.println("Returning homepage");
+            client.println(constructHomepage());
+          } else if (clientMessage.startsWith("GET /")) {
+            Serial.println("Returning AJAX response");
+            client.println(constructAjaxResponse());
+          }
+
+          if (clientMessage.length() == 1 && clientMessage[0] =='\n') {
+            while(client.read() == '\n') {
+              Serial.println("Reading empty lines from client...");
+            }
+            break;
+          }
         }
       }
-    } else {
-      Serial.println("Looks like Chrome maintaining a connection. Disconnecting...");
-      chromeHoldingRequest = 0;
-    }
-    delay(1000);
     client.stop();
     Serial.println("\n The server has disconnected the Client");
     Serial.printf("TV switch is now %d, Lounge switch is now %d", tvSwitchState, loungeSwitchState);
@@ -182,90 +181,146 @@ void loop() {
  * Construct the necessary HTTP response and HTML to display the buttons and 
  * the current state of each switch.
  ============================================================================ */
-String constructHTMLpage(){
+String constructHomepage(){
   String HTMLpage = String("HTTP/1.1 200 OK\r\n") +
                             "Content-Type: text/html\r\n" +
                             "Connection: close\r\n" +
                             "\r\n" +
                             "<!DOCTYPE HTML>";
                             
-  HTMLpage = HTMLpage + String("<html>") +
-          "<head>" +
-          "<style>" +
-            "html {" +
-              "height: 100%;" +
-            "}" +
-            
-            "body {" +
-              "height: 90%;" +
-              "margin-top: auto;" +
-              "margin-bottom: auto;" +
-              "display: flex;" +
-              "flex-direction: column;" +
-            "}" +
 
-            "div {" +
-              "width: 90%;" +
-              "margin-left: auto;" +
-              "margin-right: auto;" +
-              "display: flex;" +
-              "justify-content: space-evenly;" +
-              "flex-grow: 1;"
-            "}" +
-            
-            "button {" +
-              "padding: 50px;" +
-              "font-size: 30px;" + 
-              "margin: 5px;" +
-              "flex-grow: 1;" +
-            "}" +
-          
-            ".inactive {" +
-              "background-color: #B0BEC5;" +
-            "}" +
-        
-            ".active {" +
-              "background-color: #FDD835" +
-            "}" +
-  
-            ".oneSpeed {" +
-              "background-color: #FDD835" +
-            "}" +
-  
-            ".twoSpeed {" +
-              "background-color: #FB8C00" +
-            "}" +
-  
-            ".threeSpeed {" +
-              "background-color: #E53935" +
-            "}" +
-  
-            ".kill {" +
-              "background-color: #263238;" +
-              "color: white;" +
-              "border-style: solid;" +
-            "}" +
-          "</style>" +
-        "</head>" +
-
-        "<body>" +
-          "<br/><br/><div>" +
-          "<button onclick=\"window.location.href=\'/LIGHTS\'\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>" +
-          "<button onclick=\"window.location.href=\'/TVL\'\" class=\"" + getLightButtonClassByState(0) + "\">TV Light</button>" +
-          "<button onclick=\"window.location.href=\'/LOUNGEL\'\" class=\"" + getLightButtonClassByState(1) + "\">Lounge Light</button>" +
-          "</div><br/><br/><div>" +
-          "<button onclick=\"window.location.href=\'/FANS\'\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>" +
-          "<button onclick=\"window.location.href=\'/TVF\'\" class=\"" + getFanButtonClassByState(0) + "\">TV Fan</button>" +
-          "<button onclick=\"window.location.href=\'/LOUNGEF\'\" class=\"" + getFanButtonClassByState(1) + "\">Lounge Fan</button>" +
-//          "<button onclick=\"window.location.href=\'/FKILL\'\" class=\"kill\">Kill Fans</button>" +
-          "</div><br/><br/><div>" +
-          "<button onclick=\"window.location.href=\'/KILL\'\" class=\"kill\">OFF</button>" +
-          "</div>" +
-        "</body>" +
-        "</html>" +
-        "\r\n";
+HTMLpage = HTMLpage + String("<html>") +
+  "<head>\n" +
+    "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>\n" +
+    "<link rel=\"icon\" href=\"get-fucked-there's-no-favicon\" type=\"image/x-icon\" />\n" +
+    "<style>\n" +
+      "html {\n" +
+        "height: 100%;\n" +
+      "} \n" +
+      " "+
+      "body {\n" +
+        "height: 90%;\n" +
+        "margin-top: auto;\n" +
+        "margin-bottom: auto;\n" +
+        "display: flex;\n" +
+        "flex-direction: column;\n" +
+      "}\n" +
+      " \n" +
+      "div {\n" +
+        "width: 90%;\n" +
+        "margin-left: auto;\n" +
+        "margin-right: auto;\n" +
+        "display: flex;\n" +
+        "justify-content: space-evenly;\n" +
+        "flex-grow: 1;\n" +
+      "}\n" +
+      " \n" +
+      "button {\n" +
+        "padding: 50px;\n" +
+        "font-size: 30px;\n" +
+        "margin: 5px; \n" +
+        "flex-grow: 1; \n" +
+      "}\n" +
+      " \n" +
+      ".error {\n" +
+        "margin: auto auto;\n" +
+        "font-size: 30px;\n" +
+      "}\n" +
+      " \n" +
+      ".inactive {\n" +
+        "background-color: #B0BEC5;\n" +
+      "}\n" +
+      " "+
+      ".active {\n" +
+        "background-color: #FDD835\n" +
+      "}\n" +
+      " "+
+      ".oneSpeed {\n" +
+        "background-color: #FDD835\n" +
+      "}\n" +
+      " \n" +
+      ".twoSpeed {\n" +
+        "background-color: #FB8C00\n" +
+      "}\n" +
+      " \n" +
+      ".threeSpeed {\n" +
+        "background-color: #E53935\n" +
+      "}\n" +
+      " "+
+      ".kill {\n" +
+        "background-color: #263238;\n" +
+        "color: white;\n" +
+        "border-style: solid;\n" +
+      "}\n" +
+      ".loading {\n" +
+        "transition: transform 5s ease-in;\n" +
+        "transform: rotate(2160deg);\n" +
+      "}\n" +
+    "</style>\n" +
+  "</head>\n" +
+  " "+
+  "<body>\n" +
+    "<script>\n" +
+      "baseUrl = \"http://192.168.1.85\";\n" +
+      " "+
+      "makeRequest = async (endpoint) => {\n" +
+        "return $.ajax(baseUrl + \"/\" + endpoint)\n" +
+      "}\n" +
+      " "+
+      "throwError = () => {\n" +
+        "document.body.innerHTML = \"<span class='error'>Something went wrong &#x1F62D;<br/><a href='http://192.168.1.85''>Back</a></span>\"\n" +
+      "}\n" +
+      " \n" +
+      "sendMessage = (element) => {\n" +
+        "element.className = element.className + \" loading\"\n" +
+        "elementText = element.innerHTML;\n" +
+        "element.innerHTML = \"Loading...\";\n" +
+        "this.makeRequest(element.id).then((response) => {\n" +
+          "console.log(response);\n"
+          "if(element.innerHTML == \"OFF\")\n" +
+            "return;\n" +
+          " "+
+          "for(key in response) {\n" +
+          "  document.getElementById(key).className = response[key];\n" +
+          "}\n" +
+          "element.innerHTML = elementText;\n" +
+        "}).catch((err) => {\n" +
+          "console.log(err)\n" + 
+          "throwError()\n" +
+        "});\n" +
+      "}\n" +
+    "</script>\n" +
+    "<br/><br/><div> \n" +
+      "<button id=\"li\" onclick=\"sendMessage(this)\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>\n" +
+      "<button id=\"tLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(tvIndex) + "\">TV Light</button>\n" +
+      "<button id=\"lLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(loungeIndex) + "\">Lounge Light</button>\n" +
+    "</div><br/><br/><div>\n" +
+      "<button id=\"fa\" onclick=\"sendMessage(this)\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>\n" +
+      "<button id=\"tFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(tvIndex) + "\">TV Fan</button>\n" +
+      "<button id=\"lFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(loungeIndex) + "\">Lounge Fan</button>\n" +
+    "</div><br/><br/><div>\n" +
+      "<button id=\"off\" onclick=\"sendMessage(this)\" class=\"kill\">OFF</button>\n" +
+    "</div>\n" +
+  "</body> \n" +
+"</html>"
+"\r\n";
 
   return HTMLpage;
+}
+
+String constructAjaxResponse() {
+    return String("HTTP/1.1 200 OK\r\n") +
+                            "Content-Type: application/json\r\n" +
+                            "Connection: close\r\n" +
+                            "\r\n" +
+                            "{" +
+                              "\"li\": \"" + getCombinedLightsBtnClassByState() + "\"," +
+                              "\"tLi\": \"" + getLightButtonClassByState(tvIndex) + "\"," +
+                              "\"lLi\": \"" + getLightButtonClassByState(loungeIndex) + "\"," +
+                              "\"fa\": \"" + getCombinedFansBtnClassByState() + "\"," +
+                              "\"tFa\": \"" + getFanButtonClassByState(tvIndex) + "\"," +
+                              "\"lFa\": \"" + getFanButtonClassByState(loungeIndex) + "\"" +
+                            "}";
 }
 
 String getCombinedLightsBtnClassByState() {

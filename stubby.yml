@@ -1,0 +1,8 @@
+-  request:
+      url: /*
+   response:
+      - status: 200
+        latency: 5000
+        headers:
+            content-type: application.json
+        file: fakeData.json
