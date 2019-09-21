@@ -32,8 +32,24 @@
       } 
 
       .loading{
-        transition: transform 10s ease-in ;
-        transform: rotate(5400deg);
+        animation-duration: 2s;
+        animation-name: spin;
+        animation-iteration-count: infinite;
+        animation-fill-mode: forwards;
+      }
+
+      @keyframes spin {
+        from {
+          
+        }
+
+        75% {
+          transform: rotate(1440deg);
+        }
+
+        100% {
+          transform: rotate(1440deg);
+        }
       }
         
       .error { 

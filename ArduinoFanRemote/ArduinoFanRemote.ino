@@ -253,8 +253,24 @@ HTMLpage = HTMLpage + String("<html>") +
         "border-style: solid;\n" +
       "}\n" +
       ".loading {\n" +
-        "transition: transform 5s ease-in;\n" +
-        "transform: rotate(2160deg);\n" +
+        "animation-duration: 2s;\n" +
+        "animation-name: spin;\n" +
+        "animation-iteration-count: infinite;\n" +
+        "animation-fill-mode: forwards;\n" +
+      "}\n" +
+      "\n" +
+      "@keyframes spin {\n" +
+        "from {\n" +
+           
+        "}\n" +
+
+        "75% {\n" +
+          "transform: rotate(1440deg);\n" +
+        "}\n" +
+
+        "100% {\n" +
+          "transform: rotate(1440deg);\n" +
+        "}\n" +
       "}\n" +
     "</style>\n" +
   "</head>\n" +
@@ -276,13 +292,10 @@ HTMLpage = HTMLpage + String("<html>") +
         "elementText = element.innerHTML;\n" +
         "element.innerHTML = \"Loading...\";\n" +
         "this.makeRequest(element.id).then((response) => {\n" +
-          "console.log(response);\n"
-          "if(element.innerHTML == \"OFF\")\n" +
-            "return;\n" +
-          " "+
           "for(key in response) {\n" +
           "  document.getElementById(key).className = response[key];\n" +
           "}\n" +
+          "document.getElementById(\"off\").className = \"kill\";\n" +
           "element.innerHTML = elementText;\n" +
         "}).catch((err) => {\n" +
           "console.log(err)\n" + 
