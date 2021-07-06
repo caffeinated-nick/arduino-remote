@@ -28,11 +28,12 @@
         padding: 50px; 
         font-size: 30px; 
         margin: 5px;  
-        flex-grow: 1;  
+        width: 30%;
+        border-radius: 15px;
       } 
 
       .loading{
-        animation-duration: 2s;
+        animation-duration: 2.5s;
         animation-name: spin;
         animation-iteration-count: infinite;
         animation-fill-mode: forwards;
@@ -43,7 +44,15 @@
           
         }
 
+        10% {
+          transform: rotate(-5deg);
+        }
+
         75% {
+          transform: rotate(1445deg);
+        }
+
+        85% {
           transform: rotate(1440deg);
         }
 
@@ -119,7 +128,7 @@
     </script> 
     <br/><br/><div>  
       <button id="l" onclick="sendMessage(this)" class="">Lights</button> 
-      <button id="tL" onclick="sendMessage(this)" class="  getLightButtonClassByState(tvIndex)  ">TV Light</button> 
+      <button id="tL" onclick="sendMessage(this)" class="active">TV Light</button> 
       <button id="lL" onclick="sendMessage(this)" class="  getLightButtonClassByState(loungeIndex)  ">Lounge Light</button> 
     </div><br/><br/><div> 
       <button id="f" onclick="sendMessage(this)" class="  getCombinedFansBtnClassByState()  ">Fans</button> 

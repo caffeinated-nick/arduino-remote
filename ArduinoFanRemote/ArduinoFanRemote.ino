@@ -219,7 +219,8 @@ HTMLpage = HTMLpage + String("<html>") +
         "padding: 50px;\n" +
         "font-size: 30px;\n" +
         "margin: 5px; \n" +
-        "flex-grow: 1; \n" +
+        "width: 30%;\n" +
+        "border-radius: 15px;\n" +
       "}\n" +
       " \n" +
       ".error {\n" +
@@ -253,7 +254,7 @@ HTMLpage = HTMLpage + String("<html>") +
         "border-style: solid;\n" +
       "}\n" +
       ".loading {\n" +
-        "animation-duration: 2s;\n" +
+        "animation-duration: 2.5s;\n" +
         "animation-name: spin;\n" +
         "animation-iteration-count: infinite;\n" +
         "animation-fill-mode: forwards;\n" +
@@ -261,12 +262,20 @@ HTMLpage = HTMLpage + String("<html>") +
       "\n" +
       "@keyframes spin {\n" +
         "from {\n" +
-           
+        ""  +
+        "}\n" +
+
+        "10% {\n" +
+          "transform: rotate(-5deg);\n" +
         "}\n" +
 
         "75% {\n" +
-          "transform: rotate(1440deg);\n" +
+          "transform: rotate(1445deg);\n" +
         "}\n" +
+
+        "85% {\n" +
+          "transform: rotate(1440deg);\n" +
+        "}\n" + 
 
         "100% {\n" +
           "transform: rotate(1440deg);\n" +
