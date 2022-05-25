@@ -4,6 +4,15 @@
 
 <script lang="ts">
 	import Counter from '$lib/Counter.svelte';
+	import axios from "axios";
+
+	const lightsOn = async () => {
+		await axios.get("http://141.168.187.164/li");
+	} 
+
+	const off = async () => {
+		await axios.get("http://141.168.187.164/off");
+	}
 </script>
 
 <svelte:head>
@@ -28,6 +37,12 @@
 	</h2>
 
 	<Counter />
+	<button on:click={lightsOn}>
+		Lights... on!
+	</button>
+	<button on:click={off}>
+		Lights... off
+	</button>
 </section>
 
 <style>
