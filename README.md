@@ -64,14 +64,8 @@ I know the that the above process is kind of nuts, but in my experience it is su
 
 Once you've successfully uploaded a program, remove the wire connecting D0 to G, and power cycle the shield (remove and replace either the wire connecting to G or to 5V). Reopen the serial monitor and press RST on the shield to see expected output.
 
-## Contributing
-Take a branch and make whatever changes you'd like before making a PR/merge request. My only request is that you be collaborative in whatever changes are being made.
-
 ## Troubleshooting Remote Failures
 See [troubleshooting](docs/troubleshooting.md).
-
-## TODO:
-* None :)
 
 ## Futher Reading/Help
 ESP13 shield first time setup: https://arduinobasics.blogspot.com/2018/09/getting-started-with-keyes-esp-13-wifi.html
