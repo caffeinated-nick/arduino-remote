@@ -8,3 +8,4 @@ package
 !.env.example
 .vercel
 .output
+terraform-provider-aws_v2.56.0_x4
