@@ -76,7 +76,7 @@ void setup() {
 //  Serial.printf("Preparing to connect... %d", connected);
 //  Serial.println();
 
-  WiFi.begin("Router? I Hardly Know Her!", "cocopops2018");
+  WiFi.begin("Server", "yourenicked");
 
   Serial.print("Connecting...");
   while (WiFi.status() != WL_CONNECTED)
@@ -132,7 +132,7 @@ void loop() {
             // loungeSwitchState = updateLightState(1, loungeSwitchState);
             updateBothLights();
           } else if (clientMessage.startsWith("GET /fa")) {
-              Serial.println("Setting both fans...");
+            Serial.println("Setting both fans...");
             tvSwitchState = updateFanState(0, tvSwitchState);
             loungeSwitchState = updateFanState(1, loungeSwitchState);
           } else if (clientMessage.startsWith("GET /off")) {
