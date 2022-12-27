@@ -66,8 +66,3 @@ Once you've successfully uploaded a program, remove the wire connecting D0 to G,
 
 ## Troubleshooting Remote Failures
 See [troubleshooting](docs/troubleshooting.md).
-
-## Futher Reading/Help
-ESP13 shield first time setup: https://arduinobasics.blogspot.com/2018/09/getting-started-with-keyes-esp-13-wifi.html
-
-Flashing the shield with a program you can use: https://arduinobasics.blogspot.com/2018/09/esp-13-wifi-shield-web-server.html
