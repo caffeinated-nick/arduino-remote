@@ -29,6 +29,8 @@ public:
   void toggleLoungeLight();
   void incrementTVFan();
   void toggleTVLight();
+  int getTVState();
+  int getLoungeState();
 };
 
 #endif

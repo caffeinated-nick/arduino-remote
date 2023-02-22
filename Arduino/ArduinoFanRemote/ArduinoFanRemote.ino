@@ -42,6 +42,15 @@ bool chromeHoldingRequest = 0;
  * Connect to the Access Point.
  * Start the server if successfully connected to the AP.
  ============================================================================ */
+
+void log(char message[])
+{
+  if (debug)
+  {
+    Serial.println(message);
+  }
+}
+
 void setup()
 {
 
@@ -54,31 +63,30 @@ void setup()
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  Serial.print("Connecting...");
+  log("Connecting...");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.println(WiFi.status());
+    // Serial.println(WiFi.status());
   }
-
-  Serial.println();
+  log("\n");
 
   if (WiFi.status() == WL_CONNECTED)
   {
     server.begin();
-    Serial.println("");
-    Serial.println(WiFi.localIP());
-    Serial.println("Should be accessible at:");
-    Serial.println(WiFi.localIP());
-    Serial.println("");
+    log("");
+    log(WiFi.localIP());
+    log("Should be accessible at:");
+    log(WiFi.localIP());
+    log("");
   }
   else
   {
-    Serial.println("FAILED to connect to Access Point");
+    log("FAILED to connect to Access Point");
     int n = WiFi.scanNetworks();
     for (int i = 0; i < n; i++)
     {
-      Serial.println(WiFi.SSID(i));
+      // Serial.println(WiFi.SSID(i));
     }
     while (1)
     {
@@ -103,51 +111,49 @@ void loop()
   WiFiClient client = server.available();
   if (client)
   {
-    Serial.println("\n A Client just connected to the server");
+    log("\n A Client just connected to the server");
     while (client.connected())
     {
       if (client.available())
       {
         String clientMessage = client.readStringUntil('\r');
-        Serial.println("Client message:");
-        Serial.println(clientMessage);
+        log("Client message:");
+        // Serial.println(clientMessage);
 
         if (clientMessage.startsWith("GET /li"))
         {
-          Serial.println("Toggling both lights...");
-          // tvSwitchState = updateLightState(0, tvSwitchState);
-          // loungeSwitchState = updateLightState(1, loungeSwitchState);
+          log("Toggling both lights...");
           updateBothLights();
         }
         else if (clientMessage.startsWith("GET /fa"))
         {
-          Serial.println("Setting both fans...");
+          log("Setting both fans...");
           transmitter.incrementTVFan();
           transmitter.incrementLoungeFan();
         }
         else if (clientMessage.startsWith("GET /off"))
         {
-          Serial.println("Shutting both switches completely off...");
+          log("Shutting both switches completely off...");
           killSwitches();
         }
         else if (clientMessage.startsWith("GET /tLi"))
         {
-          Serial.println("Toggling TV light...");
+          log("Toggling TV light...");
           transmitter.toggleTVLight();
         }
         else if (clientMessage.startsWith("GET /tFa"))
         {
-          Serial.println("Setting TV fan...");
+          log("Setting TV fan...");
           transmitter.incrementTVFan();
         }
         else if (clientMessage.startsWith("GET /lLi"))
         {
-          Serial.println("Toggling Lounge light...");
+          log("Toggling Lounge light...");
           transmitter.toggleLoungeLight();
         }
         else if (clientMessage.startsWith("GET /lFa"))
         {
-          Serial.println("Toggling Lounge fan...");
+          log("Toggling Lounge fan...");
           transmitter.incrementLoungeFan();
         }
         else if (clientMessage.startsWith("GET /reset"))
@@ -157,12 +163,12 @@ void loop()
 
         if (clientMessage.startsWith("GET / "))
         {
-          Serial.println("Returning homepage");
+          log("Returning homepage");
           client.println(constructHomepage());
         }
         else if (clientMessage.startsWith("GET /"))
         {
-          Serial.println("Returning AJAX response");
+          log("Returning AJAX response");
           client.println(constructAjaxResponse());
         }
 
@@ -170,16 +176,16 @@ void loop()
         {
           while (client.read() == '\n')
           {
-            Serial.println("Reading empty lines from client...");
+            log("Reading empty lines from client...");
           }
           break;
         }
       }
     }
     client.stop();
-    Serial.println("\n The server has disconnected the Client");
+    log("\n The server has disconnected the Client");
     // Serial.printf("TV switch is now %d, Lounge switch is now %d", tvSwitchState, loungeSwitchState);
-    Serial.println()
+    log("");
   }
 }
 
@@ -321,12 +327,12 @@ String constructHomepage()
              "</script>\n" +
              "<br/><br/><div> \n" +
              "<button id=\"li\" onclick=\"sendMessage(this)\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>\n" +
-             "<button id=\"tLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(tvIndex) + "\">TV Light</button>\n" +
-             "<button id=\"lLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(loungeIndex) + "\">Lounge Light</button>\n" +
+             "<button id=\"tLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState() + "\">TV Light</button>\n" +
+             "<button id=\"lLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState() + "\">Lounge Light</button>\n" +
              "</div><br/><br/><div>\n" +
              "<button id=\"fa\" onclick=\"sendMessage(this)\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>\n" +
-             "<button id=\"tFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(tvIndex) + "\">TV Fan</button>\n" +
-             "<button id=\"lFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(loungeIndex) + "\">Lounge Fan</button>\n" +
+             "<button id=\"tFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState() + "\">TV Fan</button>\n" +
+             "<button id=\"lFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState() + "\">Lounge Fan</button>\n" +
              "</div><br/><br/><div>\n" +
              "<button id=\"off\" onclick=\"sendMessage(this)\" class=\"kill\">OFF</button>\n" +
              "</div>\n" +
@@ -345,16 +351,18 @@ String constructAjaxResponse()
          "\r\n" +
          "{" +
          "\"li\": \"" + getCombinedLightsBtnClassByState() + "\"," +
-         "\"tLi\": \"" + getLightButtonClassByState(tvIndex) + "\"," +
-         "\"lLi\": \"" + getLightButtonClassByState(loungeIndex) + "\"," +
+         "\"tLi\": \"" + getLightButtonClassByState() + "\"," +
+         "\"lLi\": \"" + getLightButtonClassByState() + "\"," +
          "\"fa\": \"" + getCombinedFansBtnClassByState() + "\"," +
-         "\"tFa\": \"" + getFanButtonClassByState(tvIndex) + "\"," +
-         "\"lFa\": \"" + getFanButtonClassByState(loungeIndex) + "\"" +
+         "\"tFa\": \"" + getFanButtonClassByState() + "\"," +
+         "\"lFa\": \"" + getFanButtonClassByState() + "\"" +
          "}";
 }
 
 String getCombinedLightsBtnClassByState()
 {
+  const int loungeSwitchState = transmitter.getLoungeState();
+  const int tvSwitchState = transmitter.getTVState();
   if (loungeSwitchState > 3 && tvSwitchState > 3)
   {
     return "active";
@@ -369,7 +377,9 @@ String getCombinedLightsBtnClassByState()
 
 String getCombinedFansBtnClassByState()
 {
-  // For the love of god write a help function for if the fans are the same
+  const int loungeSwitchState = transmitter.getLoungeState();
+  const int tvSwitchState = transmitter.getTVState();
+
   if (loungeSwitchState == tvSwitchState || loungeSwitchState == tvSwitchState - 4 || loungeSwitchState == tvSwitchState + 4)
   {
     if (loungeSwitchState == 0 || loungeSwitchState == 4)
@@ -386,6 +396,8 @@ String getCombinedFansBtnClassByState()
  */
 String getLightButtonClassByState(bool isLoungeSwitch)
 {
+  const int loungeSwitchState = transmitter.getLoungeState();
+  const int tvSwitchState = transmitter.getTVState();
   if (isLoungeSwitch)
   {
     if (loungeSwitchState > 3)
@@ -408,6 +420,8 @@ String getLightButtonClassByState(bool isLoungeSwitch)
  */
 String getFanButtonClassByState(bool isLoungeSwitch)
 {
+  const int loungeSwitchState = transmitter.getLoungeState();
+  const int tvSwitchState = transmitter.getTVState();
   if (isLoungeSwitch)
   {
     return classFromFanState(loungeSwitchState);
@@ -444,42 +458,4 @@ String classFromFanState(int state)
     break;
   }
   return "inactive";
-}
-
-int updateBothLights()
-{
-  tvSwitchState = getNewLightState(tvSwitchState);
-  loungeSwitchState = getNewLightState(loungeSwitchState);
-  updateDualState(tvSwitchState, loungeSwitchState);
-}
-
-void killSwitches()
-{
-  loungeSwitchState = 0;
-  tvSwitchState = 0;
-  updateDualState(tvSwitchState, loungeSwitchState);
-}
-
-void updateDualState(int tvState, int loungeState)
-{
-  sendMultiSignal(states[tvIndex][tvState], states[loungeIndex][loungeState]);
-}
-
-/**
- *  Send a generic (decimal number) signal to the fan.
- */
-void sendMultiSignal(int signalOne, int signalTwo)
-{
-  Serial.println("Sending multi signal!");
-  Serial.printf("Sending signal %d...", signalOne);
-  Serial.printf("Sending signal %d...", signalTwo);
-  for (int i = 0; i < 3; i++)
-  {
-    Serial.printf("Attempt %d...", i);
-    // mySwitch.send(signalOne, 21);
-    //    delay(10);
-    // mySwitch.send(signalTwo, 21);
-    delay(10);
-  }
-  Serial.println("");
 }

@@ -123,12 +123,17 @@ public:
 
   void incrementLoungeFan()
   {
-    loungeSwitchState = updateFanState(1, loungeSwitchState);
+    loungeSwitchState = updateFanState(loungeIndex, loungeSwitchState);
   }
 
   void toggleLoungeLight()
   {
-    loungeSwitchState = updateLightState(1, loungeSwitchState);
+    loungeSwitchState = updateLightState(loungeIndex, loungeSwitchState);
+  }
+
+  int getLoungeState()
+  {
+    return loungeSwitchState;
   }
 
   void incrementTVFan()
@@ -139,5 +144,10 @@ public:
   void toggleTVLight()
   {
     tvSwitchState = updateLightState(tvIndex, tvSwitchState);
+  }
+
+  int getTVState()
+  {
+    return tvSwitchState;
   }
 };
