@@ -75,9 +75,9 @@ void setup()
   {
     server.begin();
     log("");
-    log(WiFi.localIP());
+//    log(WiFi.localIP());
     log("Should be accessible at:");
-    log(WiFi.localIP());
+//    log(WiFi.localIP());
     log("");
   }
   else
@@ -123,7 +123,7 @@ void loop()
         if (clientMessage.startsWith("GET /li"))
         {
           log("Toggling both lights...");
-          updateBothLights();
+          // updateBothLights();
         }
         else if (clientMessage.startsWith("GET /fa"))
         {
@@ -134,7 +134,7 @@ void loop()
         else if (clientMessage.startsWith("GET /off"))
         {
           log("Shutting both switches completely off...");
-          killSwitches();
+          // killSwitches();
         }
         else if (clientMessage.startsWith("GET /tLi"))
         {
@@ -327,12 +327,12 @@ String constructHomepage()
              "</script>\n" +
              "<br/><br/><div> \n" +
              "<button id=\"li\" onclick=\"sendMessage(this)\" class=\"" + getCombinedLightsBtnClassByState() + "\">Lights</button>\n" +
-             "<button id=\"tLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState() + "\">TV Light</button>\n" +
-             "<button id=\"lLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState() + "\">Lounge Light</button>\n" +
+             "<button id=\"tLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(false) + "\">TV Light</button>\n" +
+             "<button id=\"lLi\" onclick=\"sendMessage(this)\" class=\"" + getLightButtonClassByState(true) + "\">Lounge Light</button>\n" +
              "</div><br/><br/><div>\n" +
              "<button id=\"fa\" onclick=\"sendMessage(this)\" class=\"" + getCombinedFansBtnClassByState() + "\">Fans</button>\n" +
-             "<button id=\"tFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState() + "\">TV Fan</button>\n" +
-             "<button id=\"lFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState() + "\">Lounge Fan</button>\n" +
+             "<button id=\"tFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(false) + "\">TV Fan</button>\n" +
+             "<button id=\"lFa\" onclick=\"sendMessage(this)\" class=\"" + getFanButtonClassByState(true) + "\">Lounge Fan</button>\n" +
              "</div><br/><br/><div>\n" +
              "<button id=\"off\" onclick=\"sendMessage(this)\" class=\"kill\">OFF</button>\n" +
              "</div>\n" +
@@ -351,11 +351,11 @@ String constructAjaxResponse()
          "\r\n" +
          "{" +
          "\"li\": \"" + getCombinedLightsBtnClassByState() + "\"," +
-         "\"tLi\": \"" + getLightButtonClassByState() + "\"," +
-         "\"lLi\": \"" + getLightButtonClassByState() + "\"," +
+         "\"tLi\": \"" + getLightButtonClassByState(false) + "\"," +
+         "\"lLi\": \"" + getLightButtonClassByState(true) + "\"," +
          "\"fa\": \"" + getCombinedFansBtnClassByState() + "\"," +
-         "\"tFa\": \"" + getFanButtonClassByState() + "\"," +
-         "\"lFa\": \"" + getFanButtonClassByState() + "\"" +
+         "\"tFa\": \"" + getFanButtonClassByState(false) + "\"," +
+         "\"lFa\": \"" + getFanButtonClassByState(true) + "\"" +
          "}";
 }
 
