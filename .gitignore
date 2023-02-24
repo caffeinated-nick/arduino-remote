@@ -16,3 +16,7 @@ node_modules
 secrets.h
 rc-switch
 esp8266
+
+# Terraform 
+.terraform*
+*tfstate

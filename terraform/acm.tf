@@ -8,7 +8,7 @@
   } */
 /* } */
 
-data "aws_acm_certificate" "yourenicked_cert" {
+/* data "aws_acm_certificate" "yourenicked_cert" {
   domain   = "*.yourenicked.net"
   statuses = ["ISSUED"]
-}
+} */

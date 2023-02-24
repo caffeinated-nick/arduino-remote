@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "fans_bucket" {
+/* resource "aws_s3_bucket" "fans_bucket" {
   bucket = var.fans-site-bucket-name
   acl    = "public-read"
 
@@ -18,4 +18,4 @@ resource "aws_s3_bucket_object" "fans_index" {
   content_type  = "text/html"
   acl           = "public-read"
   etag = filemd5(var.fans-index-file)
-}
+} */

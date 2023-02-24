@@ -1,4 +1,4 @@
-resource "aws_cloudfront_distribution" "fans_yourenicked_s3_distribution" {
+/* resource "aws_cloudfront_distribution" "fans_yourenicked_s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.fans_bucket.bucket_regional_domain_name
     origin_id   = "yourenicked_origin"
@@ -47,4 +47,4 @@ resource "aws_cloudfront_distribution" "fans_yourenicked_s3_distribution" {
     ssl_support_method  = "sni-only"
     minimum_protocol_version = "TLSv1.2_2018"
   }
-}
+} */

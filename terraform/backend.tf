@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "yourenicked-terraform"
-    key    = "fans/tf.state"
+    key    = "remote/tf.state"
     region = "ap-southeast-2"
   }
 }
