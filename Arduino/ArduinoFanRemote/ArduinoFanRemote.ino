@@ -1,4 +1,5 @@
 #include <FansRadioTransmitter.h>
+#include <WebServer.h>
 
 #include "secrets.h"
 
